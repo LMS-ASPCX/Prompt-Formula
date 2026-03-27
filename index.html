@@ -794,6 +794,9 @@
         <option value="1.2">1.2×</option>
         <option value="1.5">1.5×</option>
       </select>
+      <select id="voice-select" onchange="changeVoice(this.value)" title="Select voice" style="border:1.5px solid #CCC;border-radius:8px;padding:5px 8px;font-size:12px;font-weight:600;color:#333;cursor:pointer;background:#fff;max-width:160px;">
+        <option value="">Loading voices…</option>
+      </select>
       <span id="captions-toggle" onclick="toggleCaptions()">CC Off</span>
     </div>
   </div><!-- /main -->
@@ -868,6 +871,35 @@ let utteranceStartMs = 0;
 let elapsedBeforePause = 0;
 let currentText = '';
 let done = new Set();
+let selectedVoiceName = '';
+
+// ── VOICE PICKER ──────────────────────────────────────────────────────────
+function populateVoicePicker() {
+  const voices = window.speechSynthesis.getVoices();
+  if (!voices.length) return;
+  const sel = document.getElementById('voice-select');
+  sel.innerHTML = '';
+  const engVoices = voices.filter(v => v.lang.startsWith('en')).sort((a,b) => {
+    if (a.lang === 'en-US' && b.lang !== 'en-US') return -1;
+    if (b.lang === 'en-US' && a.lang !== 'en-US') return 1;
+    return a.name.localeCompare(b.name);
+  });
+  engVoices.forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v.name;
+    opt.textContent = v.name + (v.lang !== 'en-US' ? ' (' + v.lang + ')' : '');
+    sel.appendChild(opt);
+  });
+  const samantha = engVoices.find(v => v.name === 'Samantha');
+  const autoFemale = engVoices.find(v => /zira|susan|hazel|karen|moira|fiona/i.test(v.name));
+  const pick = samantha || autoFemale || engVoices[0];
+  if (pick) { sel.value = pick.name; selectedVoiceName = pick.name; }
+}
+
+function changeVoice(name) { selectedVoiceName = name; }
+
+window.speechSynthesis.onvoiceschanged = populateVoicePicker;
+populateVoicePicker();
 
 // ── BUILD SIDEBAR ─────────────────────────────────────────────────────────
 function buildSidebar() {
@@ -924,40 +956,48 @@ function stopSpeech() {
   elapsedBeforePause = 0;
 }
 
+function getVoice(cb) {
+  const voices = window.speechSynthesis.getVoices();
+  if (voices.length) { cb(voices); return; }
+  window.speechSynthesis.onvoiceschanged = () => cb(window.speechSynthesis.getVoices());
+}
+
 function speakFrom(text, startMs) {
   window.speechSynthesis.cancel();
   let startText = text;
   if (startMs > 0) {
-    // estimate chars per ms based on speed
     const avgCharsPerMs = 0.075 * speed;
     const skipChars = Math.floor(startMs * avgCharsPerMs);
     const idx = text.indexOf(' ', skipChars);
     startText = idx > -1 ? text.slice(idx + 1) : text;
   }
-  const utt = new SpeechSynthesisUtterance(startText);
-  utt.rate = speed;
-  utteranceStartMs = Date.now();
-  currentText = text;
-
-  utt.onboundary = (e) => {
-    if (!captionsOn) return;
-    const words = startText.split(' ');
-    const wi = e.charIndex;
-    const snippet = startText.slice(Math.max(0, wi - 60), wi + 80).trim();
-    setCaption('…' + snippet + '…');
-  };
-  utt.onend = () => {
-    done.add(currentSlide);
-    document.getElementById('done-' + currentSlide).style.display = 'inline';
-    elapsedBeforePause = 0;
-    isPlaying = false;
-    document.getElementById('btn-play').textContent = '▶ Play';
-    setCaption('Chapter complete ✓');
-    if (currentSlide < chapters.length - 1) {
-      setTimeout(() => nextSlide(), 800);
-    }
-  };
-  window.speechSynthesis.speak(utt);
+  getVoice(voices => {
+    const utt = new SpeechSynthesisUtterance(startText);
+    utt.rate = speed;
+    utt.pitch = 0.85;
+    const preferred = voices.find(v => v.name === selectedVoiceName) || voices.find(v => v.name === 'Samantha') || voices.find(v => v.lang === 'en-US') || voices[0];
+    if (preferred) utt.voice = preferred;
+    utteranceStartMs = Date.now();
+    currentText = text;
+    utt.onboundary = (e) => {
+      if (!captionsOn) return;
+      const wi = e.charIndex;
+      const snippet = startText.slice(Math.max(0, wi - 60), wi + 80).trim();
+      setCaption('…' + snippet + '…');
+    };
+    utt.onend = () => {
+      done.add(currentSlide);
+      document.getElementById('done-' + currentSlide).style.display = 'inline';
+      elapsedBeforePause = 0;
+      isPlaying = false;
+      document.getElementById('btn-play').textContent = '▶ Play';
+      setCaption('Chapter complete ✓');
+      if (currentSlide < chapters.length - 1) {
+        setTimeout(() => nextSlide(), 800);
+      }
+    };
+    window.speechSynthesis.speak(utt);
+  });
 }
 
 function togglePlay() {
@@ -1000,6 +1040,8 @@ function toggleCaptions() {
 // ── INIT ──────────────────────────────────────────────────────────────────
 buildSidebar();
 updateProgress();
+populateVoicePicker();
 </script>
 </body>
 </html>
+         
