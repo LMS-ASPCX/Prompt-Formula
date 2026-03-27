@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AI Prompt Formula Training | TruVolt Brands</title>
+<style>
+  :root {
+    --orange:   #FF6600;
+    --blue:     #1946BA;
+    --aqua:     #00B2CE;
+    --green:    #C3CF21;
+    --charcoal: #333333;
+    --body-txt: #222222;
+    --light-bg: #F5F5F5;
+    --white:    #FFFFFF;
+    --sidebar-w: 260px;
+    --ctrl-h:   60px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--light-bg);
+    color: var(--body-txt);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ── TOP BAR ── */
+  #topbar {
+    background: var(--blue);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 20px;
+    height: 52px;
+    flex-shrink: 0;
+    z-index: 10;
+  }
+  #topbar .logo {
+    font-weight: 800;
+    font-size: 17px;
+    letter-spacing: 0.5px;
+    color: #fff;
+  }
+  #topbar .logo span { color: var(--orange); }
+  #topbar .subtitle {
+    font-size: 12px;
+    opacity: .75;
+    margin-top: 1px;
+  }
+  #topbar .badge {
+    margin-left: auto;
+    background: var(--orange);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: .4px;
+  }
+
+  /* ── LAYOUT ── */
+  #layout {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* ── SIDEBAR ── */
+  #sidebar {
+    width: var(--sidebar-w);
+    background: #F0F0F0;
+    border-right: 1px solid #DDDDDD;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+  #sidebar-header {
+    padding: 14px 16px 10px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #888;
+    border-bottom: 1px solid #DDD;
+  }
+  .chapter-btn {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 11px 14px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    text-align: left;
+    width: 100%;
+    border-bottom: 1px solid #E8E8E8;
+    transition: background .15s;
+  }
+  .chapter-btn:hover { background: #E5E5E5; }
+  .chapter-btn.active {
+    background: var(--orange);
+    color: #fff;
+  }
+  .chapter-btn.active .ch-num { background: rgba(255,255,255,.25); color: #fff; }
+  .chapter-btn.active .ch-title { color: #fff; }
+  .chapter-btn.active .ch-dur { color: rgba(255,255,255,.75); }
+  .ch-num {
+    min-width: 24px; height: 24px;
+    background: var(--blue);
+    color: #fff;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .ch-info { flex: 1; }
+  .ch-title { font-size: 12.5px; font-weight: 600; color: var(--charcoal); line-height: 1.3; }
+  .ch-dur { font-size: 10px; color: #999; margin-top: 2px; }
+  .ch-done { color: var(--green); font-size: 13px; margin-left: auto; }
+
+  /* ── MAIN CONTENT ── */
+  #main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ── SLIDE ── */
+  #slide-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 28px 32px;
+  }
+
+  .slide {
+    display: none;
+    max-width: 820px;
+    margin: 0 auto;
+    animation: fadeIn .3s ease;
+  }
+  .slide.active { display: block; }
+
+  @keyframes fadeIn { from {opacity:0; transform:translateY(8px)} to {opacity:1; transform:translateY(0)} }
+
+  /* slide components */
+  .slide-header {
+    border-left: 5px solid var(--orange);
+    padding-left: 16px;
+    margin-bottom: 22px;
+  }
+  .slide-tag {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--orange);
+    margin-bottom: 4px;
+  }
+  .slide-title {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--blue);
+    line-height: 1.2;
+  }
+  .slide-subtitle {
+    font-size: 14px;
+    color: #666;
+    margin-top: 5px;
+  }
+
+  .card {
+    background: var(--white);
+    border-radius: 10px;
+    padding: 20px 22px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.07);
+  }
+  .card.orange  { border-left: 4px solid var(--orange); }
+  .card.blue    { border-left: 4px solid var(--blue); }
+  .card.aqua    { border-left: 4px solid var(--aqua); }
+  .card.green   { border-left: 4px solid var(--green); }
+
+  .card-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .card-label.orange { color: var(--orange); }
+  .card-label.blue   { color: var(--blue); }
+  .card-label.aqua   { color: var(--aqua); }
+  .card-label.green  { color: var(--green); }
+
+  .card h3 { font-size: 15px; font-weight: 700; color: var(--charcoal); margin-bottom: 6px; }
+  .card p  { font-size: 13.5px; color: #444; line-height: 1.6; }
+  .card ul { padding-left: 18px; margin-top: 6px; }
+  .card li { font-size: 13.5px; color: #444; line-height: 1.7; }
+
+  /* formula grid */
+  .formula-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .formula-item {
+    background: var(--white);
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,.07);
+    cursor: pointer;
+    transition: transform .15s, box-shadow .15s;
+  }
+  .formula-item:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.12); }
+  .formula-item .fi-num {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px; font-weight: 800;
+    color: #fff;
+    margin: 0 auto 8px;
+  }
+  .formula-item .fi-name { font-size: 13px; font-weight: 700; color: var(--charcoal); }
+  .formula-item .fi-desc { font-size: 11.5px; color: #777; margin-top: 3px; }
+
+  /* prompt box */
+  .prompt-box {
+    background: #1A1A2E;
+    border-radius: 10px;
+    padding: 20px 22px;
+    margin-bottom: 16px;
+    position: relative;
+  }
+  .prompt-box .pb-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--aqua);
+    margin-bottom: 10px;
+  }
+  .prompt-box .pb-line {
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    color: #E0E0E0;
+    line-height: 1.8;
+  }
+  .prompt-box .pb-line .tag { color: var(--orange); font-weight: 700; }
+  .prompt-box .pb-line .val { color: #90EE90; }
+
+  /* tip box */
+  .tip-box {
+    background: #FFF8F0;
+    border: 1px solid #FFD5B3;
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-bottom: 16px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .tip-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+  .tip-box p { font-size: 13.5px; color: #555; line-height: 1.6; }
+  .tip-box strong { color: var(--orange); }
+
+  /* pill tags */
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .tag-pill {
+    background: var(--light-bg);
+    border: 1px solid #DDD;
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--charcoal);
+  }
+  .tag-pill.orange { background: #FFF0E6; border-color: var(--orange); color: var(--orange); }
+  .tag-pill.blue   { background: #E8EEFF; border-color: var(--blue);   color: var(--blue); }
+  .tag-pill.aqua   { background: #E0F7FC; border-color: var(--aqua);   color: var(--aqua); }
+  .tag-pill.green  { background: #F5FAE0; border-color: var(--green);  color: #5a6b00; }
+
+  /* summary row */
+  .summary-row {
+    display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px;
+  }
+  .sum-item {
+    flex: 1; min-width: 120px;
+    background: var(--white);
+    border-radius: 10px;
+    padding: 14px 16px;
+    text-align: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,.07);
+  }
+  .sum-item .si-icon { font-size: 24px; margin-bottom: 5px; }
+  .sum-item .si-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; }
+  .sum-item .si-val { font-size: 13px; font-weight: 700; color: var(--blue); margin-top: 3px; }
+
+  /* ── CONTROLS ── */
+  #controls {
+    height: var(--ctrl-h);
+    background: var(--white);
+    border-top: 1px solid #E0E0E0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 20px;
+    flex-shrink: 0;
+  }
+  .ctrl-btn {
+    background: none;
+    border: 1.5px solid #CCC;
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--charcoal);
+    transition: all .15s;
+  }
+  .ctrl-btn:hover { background: var(--light-bg); }
+  .ctrl-btn.primary {
+    background: var(--orange);
+    border-color: var(--orange);
+    color: #fff;
+    padding: 6px 20px;
+  }
+  .ctrl-btn.primary:hover { background: #E05500; }
+
+  #progress-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  #progress-bar-outer {
+    flex: 1;
+    height: 6px;
+    background: #E0E0E0;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  #progress-bar-inner {
+    height: 100%;
+    background: var(--orange);
+    border-radius: 3px;
+    transition: width .3s;
+    width: 0%;
+  }
+  #progress-label { font-size: 12px; color: #888; white-space: nowrap; }
+
+  #speed-select {
+    border: 1.5px solid #CCC;
+    border-radius: 8px;
+    padding: 5px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--charcoal);
+    cursor: pointer;
+    background: var(--white);
+  }
+
+  #caption-area {
+    min-height: 36px;
+    background: var(--white);
+    border-top: 1px solid #EFEFEF;
+    padding: 8px 24px;
+    font-size: 13px;
+    color: #555;
+    font-style: italic;
+    flex-shrink: 0;
+    line-height: 1.5;
+    transition: opacity .3s;
+  }
+
+  #captions-toggle {
+    font-size: 11px; font-weight: 700; color: #888; cursor: pointer;
+    white-space: nowrap; text-decoration: underline;
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <div>
+    <div class="logo">TruVolt <span>Brands</span> · Agent Training</div>
+    <div class="subtitle">AI Prompt Formula — The 6-Part Framework</div>
+  </div>
+  <div class="badge">📋 6-Part Framework</div>
+</div>
+
+<div id="layout">
+
+  <!-- SIDEBAR -->
+  <div id="sidebar">
+    <div id="sidebar-header">Chapters</div>
+    <div id="chapter-list"></div>
+  </div>
+
+  <!-- MAIN -->
+  <div id="main">
+    <div id="slide-area">
+
+      <!-- ══ SLIDE 0: INTRO ══ -->
+      <div class="slide active" id="slide-0">
+        <div class="slide-header">
+          <div class="slide-tag">Welcome</div>
+          <div class="slide-title">Why Your Prompts Matter</div>
+          <div class="slide-subtitle">A simple formula that actually works</div>
+        </div>
+        <div class="card orange">
+          <div class="card-label orange">The Problem</div>
+          <p>There's a ton of advice out there on writing better AI prompts — some good, a lot of noise. The truth is, most weak outputs come from weak inputs. If you've ever gotten a generic or off-base response from Claude or ChatGPT, the prompt is usually why.</p>
+        </div>
+        <div class="card blue">
+          <div class="card-label blue">What You'll Learn</div>
+          <p>A <strong>6-part prompt formula</strong> you can use for any task — writing macros, drafting emails, summarizing tickets, building Mavenoid flows, analyzing reviews, or anything else you throw at AI. We'll use real TruVolt examples throughout.</p>
+        </div>
+        <div class="tip-box">
+          <div class="tip-icon">💡</div>
+          <p><strong>This applies to Claude, ChatGPT, and any other AI tool.</strong> The formula is universal. Better structure = better output, every time.</p>
+        </div>
+        <div class="summary-row">
+          <div class="sum-item"><div class="si-icon">🎯</div><div class="si-label">Parts</div><div class="si-val">6</div></div>
+          <div class="sum-item"><div class="si-icon">⏱️</div><div class="si-label">Duration</div><div class="si-val">~8 min</div></div>
+          <div class="sum-item"><div class="si-icon">🏷️</div><div class="si-label">Audience</div><div class="si-val">All Agents</div></div>
+          <div class="sum-item"><div class="si-icon">✅</div><div class="si-label">Applies To</div><div class="si-val">Any AI Tool</div></div>
+        </div>
+      </div>
+
+      <!-- ══ SLIDE 1: OVERVIEW ══ -->
+      <div class="slide" id="slide-1">
+        <div class="slide-header">
+          <div class="slide-tag">The Formula</div>
+          <div class="slide-title">6 Parts. Every Prompt.</div>
+          <div class="slide-subtitle">Use all six for best results — skip one and quality drops</div>
+        </div>
+        <div class="formula-grid">
+          <div class="formula-item">
+            <div class="fi-num" style="background:var(--orange);">1</div>
+            <div class="fi-name">Persona</div>
+            <div class="fi-desc">Who is the AI?</div>
+          </div>
+          <div class="formula-item">
+            <div class="fi-num" style="background:var(--blue);">2</div>
+            <div class="fi-name">Context</div>
+            <div class="fi-desc">What's the situation?</div>
+          </div>
+          <div class="formula-item">
+            <div class="fi-num" style="background:var(--aqua);">3</div>
+            <div class="fi-name">Task</div>
+            <div class="fi-desc">What do you want?</div>
+          </div>
+          <div class="formula-item">
+            <div class="fi-num" style="background:#888;">4</div>
+            <div class="fi-name">Format</div>
+            <div class="fi-desc">How should it look?</div>
+          </div>
+          <div class="formula-item">
+            <div class="fi-num" style="background:var(--green); color:#333;">5</div>
+            <div class="fi-name">Examples</div>
+            <div class="fi-desc">What does "good" look like?</div>
+          </div>
+          <div class="formula-item">
+            <div class="fi-num" style="background:#c0392b;">6</div>
+            <div class="fi-name">Tone</div>
+            <div class="fi-desc">How should it sound?</div>
+          </div>
+        </div>
+        <div class="tip-box">
+          <div class="tip-icon">🔑</div>
+          <p><strong>Quick memory trick:</strong> <em>P·C·T·F·E·T</em> — "Please, Claude, Tell me Fantastic Examples Today." We'll go through each part now.</p>
+        </div>
+      </div>
+
+      <!-- ══ SLIDE 2: PERSONA ══ -->
+      <div class="slide" id="slide-2">
+        <div class="slide-header">
+          <div class="slide-tag">Part 1 of 6</div>
+          <div class="slide-title">Persona</div>
+          <div class="slide-subtitle">Tell the AI who it is — and it becomes that expert</div>
+        </div>
+        <div class="card orange">
+          <div class="card-label orange">Why It Works</div>
+          <p>When you assign a role, the AI activates the knowledge, vocabulary, and perspective of that role. It shifts from "generic assistant" to "specialized expert." This one change alone lifts output quality noticeably.</p>
+        </div>
+        <div class="card blue">
+          <div class="card-label blue">TruVolt Examples</div>
+          <ul>
+            <li>"You are a senior TruVolt customer service agent specializing in Shop Joe pressure washers."</li>
+            <li>"You are a Zendesk administrator with deep knowledge of macros, triggers, and automations."</li>
+            <li>"You are a QA evaluator reviewing customer service interactions using the EAR scoring framework."</li>
+            <li>"You are a Mavenoid flow architect designing troubleshooting trees for electric outdoor tools."</li>
+          </ul>
+        </div>
+        <div class="tip-box">
+          <div class="tip-icon">💡</div>
+          <p><strong>Be specific.</strong> "Customer service agent" is okay. "Senior TruVolt agent who handles warranty escalations for Snow Joe battery products" is much better. Specificity = better output.</p>
+        </div>
+      </div>
+
+      <!-- ══ SLIDE 3: CONTEXT ══ -->
+      <div class="slide" id="slide-3">
+        <div class="slide-header">
+          <div class="slide-tag">Part 2 of 6</div>
+          <div class="slide-title">Context</div>
+          <div class="slide-subtitle">The more background you give, the better the output</div>
+        </div>
+        <div class="card orange">
+          <div class="card-label orange">What to Include</div>
+          <ul>
+            <li>Brand: Shop Joe, Sun Joe, Snow Joe, Ride Jetson, Bliss Hammocks</li>
+            <li>Channel: Email, phone, messaging, HSN</li>
+            <li>Customer situation: what happened, what they said, what they want</li>
+            <li>Internal constraints: warranty status, WTY-HOLD, replacement policy</li>
+            <li>Relevant product: SKU, symptom, purchase channel</li>
+          </ul>
+        </div>
+        <div class="card blue">
+          <div class="card-label blue">Example</div>
+          <p>"A customer purchased a Sun Joe SPX3000 pressure washer from Amazon 14 months ago. It's now losing pressure and they're asking for a replacement. Our standard warranty is 2 years for this product. The ticket is open in Zendesk under the email channel."</p>
+        </div>
+        <div class="tip-box">
+          <div class="tip-icon">💡</div>
+          <p><strong>Don't assume Claude knows your setup.</strong> Paste in the ticket text, the customer's exact words, or the policy. The AI only knows what you tell it.</p>
+        </div>
+      </div>
+
+      <!-- ══ SLIDE 4: TASK ══ -->
+      <div class="slide" id="slide-4">
+        <div class="slide-header">
+          <div class="slide-tag">Part 3 of 6</div>
+          <div class="slide-title">Task</div>
+          <div class="slide-subtitle">State exactly what you want — no ambiguity</div>
+        </div>
+        <div class="card orange">
+          <div class="card-label orange">The Rule</div>
+          <p>One clear action verb. Vague prompts produce vague outputs. Be direct about exactly what deliverable you need.</p>
+        </div>
+        <div class="card blue">
+          <div class="card-label blue">Weak vs. Strong</div>
+          <ul>
+            <li>❌ "Help me with this ticket" → too vague</li>
+            <li>✅ "Write a professional email response to this customer approving their warranty claim and providing next steps."</li>
+            <li>❌ "Summarize this" → vague</li>
+            <li>✅ "Summarize the top 5 customer complaints from this HSN review batch into a 3-sentence executive summary."</li>
+            <li>❌ "Make a macro" → vague</li>
+            <li>✅ "Write a Zendesk macro for an agent responding to a Ride Jetson app retirement question. Include a subject line and a closing with next steps."</li>
+          </ul>
+        </div>
+        <div class="tip-box">
+          <div class="tip-icon">💡</div>
+          <p><strong>One task at a time.</strong> If you need multiple things, either chain them ("First do X. Then do Y.") or make separate prompts.</p>
+        </div>
+      </div>
+
+      <!-- ══ SLIDE 5: FORMAT ══ -->
+      <div class="slide" id="slide-5">
+        <div class="slide-header">
+          <div class="slide-tag">Part 4 of 6</div>
+          <div class="slide-title">Format</div>
+          <div class="slide-subtitle">Tell it how to structure the output before it writes it</div>
+        </div>
+        <div class="card orange">
+          <div class="card-label orange">Format Options</div>
+          <div class="tags">
+            <span class="tag-pill orange">Table</span>
+            <span class="tag-pill blue">Bullet Points</span>
+            <span class="tag-pill aqua">Email</span>
+            <span class="tag-pill green">Numbered Steps</span>
+            <span class="tag-pill">Markdown Headers</span>
+            <span class="tag-pill orange">JSON</span>
+            <span class="tag-pill blue">Summary + Detail</span>
+            <span class="tag-pill aqua">Scorecard</span>
+          </div>
+        </div>
+        <div class="card blue">
+          <div class="card-label blue">TruVolt Format Examples</div>
+          <ul>
+            <li>"Format as a table with columns: Ticket ID, Issue, Agent Action, Resolution."</li>
+            <li>"Use markdown with headers for each section: Summary, Root Cause, Recommended Fix."</li>
+            <li>"Output as a QA scorecard with pass/fail and a score out of 100."</li>
+            <li>"Bold every change you make when proofreading."</li>
+            <li>"Give me a TLDR in 2 sentences, then the full breakdown below."</li>
+          </ul>
+        </div>
+        <div class="tip-box">
+          <div class="tip-icon">💡</div>
+          <p><strong>Pro move:</strong> When dealing with a lot of data, always ask for a summary first, then the breakdown. "Give me the 3 biggest takeaways, then show me the full table."</p>
+        </div>
+      </div>
+
+      <!-- ══ SLIDE 6: EXAMPLES ══ -->
+      <div class="slide" id="slide-6">
+        <div class="slide-header">
+          <div class="slide-tag">Part 5 of 6</div>
+          <div class="slide-title">Examples</div>
+          <div class="slide-subtitle">Show the AI what "good" looks like and it will match it</div>
+        </div>
+        <div class="card orange">
+          <div class="card-label orange">Why This Is Powerful</div>
+          <p>Examples remove guesswork. Instead of hoping the AI interprets your request correctly, you show it exactly the quality, style, and structure you expect. This is especially useful for tone-matching and format-matching.</p>
+        </div>
+        <div class="card blue">
+          <div class="card-label blue">What to Include as Examples</div>
+          <ul>
+            <li>A past email response you were happy with → "Match this style."</li>
+            <li>A macro that worked well → "Follow this structure."</li>
+            <li>A QA comment from a high-scoring ticket → "Use this as the benchmark."</li>
+            <li>A Mavenoid node you want replicated → "Build the next section like this."</li>
+            <li>An existing help article → "Match this voice and format."</li>
+          </ul>
+        </div>
+        <div class="tip-box">
+          <div class="tip-icon">💡</div>
+          <p><strong>Paste it in.</strong> Don't describe the example — paste the actual text. "Here's an example: [paste]" beats "Write it like our previous emails" every time.</p>
+        </div>
+      </div>
+
+      <!-- ══ SLIDE 7: TONE ══ -->
+      <div class="slide" id="slide-7">
+        <div class="slide-header">
+          <div class="slide-tag">Part 6 of 6</div>
+          <div class="slide-title">Tone</div>
+          <div class="slide-subtitle">How it sounds is as important as what it says</div>
+        </div>
+        <div class="card orange">
+          <div class="card-label orange">Tone Examples</div>
+          <div class="tags">
+            <span class="tag-pill orange">Empathetic</span>
+            <span class="tag-pill blue">Professional</span>
+            <span class="tag-pill aqua">Friendly but firm</span>
+            <span class="tag-pill green">Concise</span>
+            <span class="tag-pill orange">Confident</span>
+            <span class="tag-pill blue">Warm</span>
+            <span class="tag-pill aqua">Direct</span>
+            <span class="tag-pill">Neutral / Factual</span>
+          </div>
+        </div>
+        <div class="card blue">
+          <div class="card-label blue">By Situation</div>
+          <ul>
+            <li><strong>Upset customer:</strong> "Empathetic, calm, solution-focused"</li>
+            <li><strong>Warranty denial:</strong> "Professional, clear, not apologetic"</li>
+            <li><strong>HSN caller:</strong> "Warm, patient, simple language"</li>
+            <li><strong>Internal escalation:</strong> "Direct, factual, no fluff"</li>
+            <li><strong>Social media reply:</strong> "Friendly, brand-appropriate, brief"</li>
+          </ul>
+        </div>
+        <div class="tip-box">
+          <div class="tip-icon">💡</div>
+          <p><strong>Don't know the tone? Ask the AI.</strong> Type: "Give me 5 tone keywords that fit this situation." Pick the ones that feel right and add them back to your prompt.</p>
+        </div>
+      </div>
+
+      <!-- ══ SLIDE 8: FULL EXAMPLE ══ -->
+      <div class="slide" id="slide-8">
+        <div class="slide-header">
+          <div class="slide-tag">Putting It Together</div>
+          <div class="slide-title">A Full TruVolt Prompt</div>
+          <div class="slide-subtitle">All 6 parts in one real-world example</div>
+        </div>
+        <div class="prompt-box">
+          <div class="pb-label">📋 Complete Prompt</div>
+          <div class="pb-line"><span class="tag">[PERSONA]</span> <span class="val">You are a senior TruVolt customer service agent specializing in Snow Joe products and warranty resolution.</span></div>
+          <br>
+          <div class="pb-line"><span class="tag">[CONTEXT]</span> <span class="val">A customer bought a Snow Joe 24V-X2-SB18 snow blower from Home Depot 10 months ago. They say it won't start after sitting in the garage all summer. They've already replaced the battery. Ticket is via email channel. No prior contact on file.</span></div>
+          <br>
+          <div class="pb-line"><span class="tag">[TASK]</span> <span class="val">Write a first-contact email response that acknowledges their issue, provides 3 troubleshooting steps to try before we process a warranty claim, and tells them how to reach us if the steps don't resolve it.</span></div>
+          <br>
+          <div class="pb-line"><span class="tag">[FORMAT]</span> <span class="val">Include: subject line, personalized opening, numbered troubleshooting steps, and a closing with our warranty process link placeholder [LINK].</span></div>
+          <br>
+          <div class="pb-line"><span class="tag">[EXAMPLES]</span> <span class="val">Use this as the tone and format model: [paste your best past response here]</span></div>
+          <br>
+          <div class="pb-line"><span class="tag">[TONE]</span> <span class="val">Empathetic, confident, solution-focused. Not overly apologetic.</span></div>
+        </div>
+        <div class="tip-box">
+          <div class="tip-icon">🎯</div>
+          <p><strong>This prompt will produce a near-ready response.</strong> You may only need to swap in the customer name and add your specific link. That's the power of all 6 parts working together.</p>
+        </div>
+      </div>
+
+      <!-- ══ SLIDE 9: PRO TIPS ══ -->
+      <div class="slide" id="slide-9">
+        <div class="slide-header">
+          <div class="slide-tag">Pro Tips</div>
+          <div class="slide-title">Make Every Prompt Count</div>
+          <div class="slide-subtitle">Quick-reference habits to build into your workflow</div>
+        </div>
+        <div class="card orange">
+          <div class="card-label orange">Power Moves</div>
+          <ul>
+            <li><strong>Proofreading:</strong> "Bold all changes you make" — makes edits instantly visible</li>
+            <li><strong>Large data sets:</strong> "Give me the summary first, then the full breakdown"</li>
+            <li><strong>Unknown tone:</strong> "Give me 5 tone keywords for this situation" then pick and add them</li>
+            <li><strong>Tables:</strong> Always specify column headers — don't let the AI guess</li>
+            <li><strong>Iteration:</strong> Got a decent output? Say "keep the structure, make it shorter / more formal / less technical"</li>
+          </ul>
+        </div>
+        <div class="card blue">
+          <div class="card-label blue">TruVolt-Specific Shortcuts</div>
+          <ul>
+            <li>Always name the brand (Snow Joe, Sun Joe, Jetson, Bliss Hammocks) — each has different voice and policy</li>
+            <li>Mention the channel (email / phone / chat / HSN) — tone and format differ by channel</li>
+            <li>Include policy constraints upfront — "warranty is 2 years", "customer is outside warranty window"</li>
+            <li>Reference internal tools when relevant — "this will become a Zendesk macro" or "this is for a Mavenoid node"</li>
+          </ul>
+        </div>
+        <div class="tip-box">
+          <div class="tip-icon">🚀</div>
+          <p><strong>Build a library.</strong> Save your best prompts. Reuse them. Swap in new context as needed. The prompt is a template — treat it like one.</p>
+        </div>
+      </div>
+
+      <!-- ══ SLIDE 10: WRAP ══ -->
+      <div class="slide" id="slide-10">
+        <div class="slide-header">
+          <div class="slide-tag">Summary</div>
+          <div class="slide-title">The Formula — Locked In</div>
+          <div class="slide-subtitle">Better prompts = better outputs, every single time</div>
+        </div>
+        <div class="formula-grid">
+          <div class="formula-item">
+            <div class="fi-num" style="background:var(--orange);">1</div>
+            <div class="fi-name">Persona</div>
+            <div class="fi-desc">Set the role & expertise</div>
+          </div>
+          <div class="formula-item">
+            <div class="fi-num" style="background:var(--blue);">2</div>
+            <div class="fi-name">Context</div>
+            <div class="fi-desc">Give the full situation</div>
+          </div>
+          <div class="formula-item">
+            <div class="fi-num" style="background:var(--aqua);">3</div>
+            <div class="fi-name">Task</div>
+            <div class="fi-desc">One clear action</div>
+          </div>
+          <div class="formula-item">
+            <div class="fi-num" style="background:#888;">4</div>
+            <div class="fi-name">Format</div>
+            <div class="fi-desc">Define the structure</div>
+          </div>
+          <div class="formula-item">
+            <div class="fi-num" style="background:var(--green); color:#333;">5</div>
+            <div class="fi-name">Examples</div>
+            <div class="fi-desc">Show what good looks like</div>
+          </div>
+          <div class="formula-item">
+            <div class="fi-num" style="background:#c0392b;">6</div>
+            <div class="fi-name">Tone</div>
+            <div class="fi-desc">Name the voice</div>
+          </div>
+        </div>
+        <div class="card orange">
+          <div class="card-label orange">Your Action</div>
+          <p>Next time you open Claude or ChatGPT, run through the checklist: Persona → Context → Task → Format → Examples → Tone. You don't need all six every time — but when the output matters, use all six. The difference is night and day.</p>
+        </div>
+        <div class="tip-box">
+          <div class="tip-icon">🏁</div>
+          <p><strong>Training complete.</strong> Share your best prompts with the team — we're building a library. The more we share, the faster everyone levels up.</p>
+        </div>
+      </div>
+
+    </div><!-- /slide-area -->
+
+    <!-- CAPTIONS -->
+    <div id="caption-area">Press Play to begin narration.</div>
+
+    <!-- CONTROLS -->
+    <div id="controls">
+      <button class="ctrl-btn" id="btn-prev" onclick="prevSlide()">◀ Prev</button>
+      <button class="ctrl-btn primary" id="btn-play" onclick="togglePlay()">▶ Play</button>
+      <button class="ctrl-btn" id="btn-next" onclick="nextSlide()">Next ▶</button>
+      <div id="progress-wrap">
+        <div id="progress-bar-outer"><div id="progress-bar-inner"></div></div>
+        <div id="progress-label" id="ch-label">1 / 11</div>
+      </div>
+      <select id="speed-select" onchange="changeSpeed(this.value)">
+        <option value="0.8">0.8×</option>
+        <option value="1" selected>1×</option>
+        <option value="1.2">1.2×</option>
+        <option value="1.5">1.5×</option>
+      </select>
+      <span id="captions-toggle" onclick="toggleCaptions()">CC Off</span>
+    </div>
+  </div><!-- /main -->
+</div><!-- /layout -->
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────
+const chapters = [
+  {
+    title: "Why Prompts Matter",
+    dur: "~45s",
+    narration: `Welcome to this training on the six-part prompt formula. Whether you're writing a macro in Zendesk, drafting a customer email, or using Claude to analyze a batch of reviews, the quality of your output depends almost entirely on the quality of your prompt. There's a lot of advice out there — most of it is noise. This framework is simple, proven, and applies to every AI tool you'll use here at TruVolt. Let's get into it.`
+  },
+  {
+    title: "The 6-Part Formula",
+    dur: "~40s",
+    narration: `The formula has six parts: Persona, Context, Task, Format, Examples, and Tone. Here's a quick memory trick — P C T F E T — "Please Claude Tell me Fantastic Examples Today." Use all six for best results. Skip one and the output gets noticeably weaker. We're going to go through each part now with real TruVolt examples.`
+  },
+  {
+    title: "Part 1 – Persona",
+    dur: "~40s",
+    narration: `Part one: Persona. This is where you tell the AI who it is. When you assign a role, the AI shifts from generic assistant to a specialized expert with the knowledge and vocabulary of that role. Instead of saying "you are an AI," try something like: "You are a senior TruVolt customer service agent specializing in Snow Joe battery products." Or — "You are a Zendesk administrator with deep knowledge of macros and automations." Or for QA — "You are a QA evaluator using the EAR scoring framework." Be specific. The more specific the role, the better the output.`
+  },
+  {
+    title: "Part 2 – Context",
+    dur: "~45s",
+    narration: `Part two: Context. Give the AI the full situation before you ask for anything. Think of it like briefing a new agent before they pick up the phone. Include the brand — Shop Joe, Snow Joe, Jetson, Bliss Hammocks. Include the channel — email, phone, chat, or HSN. Include the customer's situation — what happened, what they want, what their warranty status is. The AI only knows what you tell it. Don't assume it knows our products, policies, or systems. Paste in the ticket text if you have it. More context means better, more accurate output.`
+  },
+  {
+    title: "Part 3 – Task",
+    dur: "~40s",
+    narration: `Part three: Task. This is where you say exactly what you want. One clear action. Vague tasks produce vague outputs. Instead of "help me with this ticket," say: "Write a professional email response approving this warranty claim and providing next steps." Instead of "summarize this," say: "Summarize the top five complaints from this HSN review batch into a three-sentence executive summary." One task, one verb, one clear deliverable. If you need multiple things, chain them — first do this, then do that.`
+  },
+  {
+    title: "Part 4 – Format",
+    dur: "~45s",
+    narration: `Part four: Format. Tell the AI how to structure the output before it writes anything. Common formats include tables, bullet points, numbered steps, email with subject line, markdown with headers, or a scorecard layout. For TruVolt work: if you want a QA scorecard, say "format as a scorecard with pass/fail and a score out of 100." If you're proofreading, say "bold all changes you make." If you have a lot of data, say "give me the top three takeaways first, then show me the full table." Format specifications remove guesswork and save you editing time.`
+  },
+  {
+    title: "Part 5 – Examples",
+    dur: "~40s",
+    narration: `Part five: Examples. Show the AI what "good" looks like and it will match it. This is one of the most powerful parts of the formula. Instead of hoping the AI interprets your request correctly, paste in a past email you were happy with, a macro that worked well, or a help article that matches the voice you want. Say: "Here is an example — match this style and format." You don't need to describe what you want — show it. Pasting an actual example beats describing it in words every time.`
+  },
+  {
+    title: "Part 6 – Tone",
+    dur: "~40s",
+    narration: `Part six: Tone. Tell the AI how the output should sound. For an upset customer: empathetic, calm, solution-focused. For a warranty denial: professional, clear, not overly apologetic. For an HSN caller: warm, patient, simple language. For an internal escalation: direct, factual, no fluff. If you're not sure what tone fits the situation, ask the AI: "Give me five tone keywords for this situation." Pick the ones that feel right and add them back into your prompt. Simple, but it makes a big difference.`
+  },
+  {
+    title: "Full Prompt Example",
+    dur: "~50s",
+    narration: `Now let's put all six parts together. Here's a full example for a Snow Joe ticket. Persona: You are a senior TruVolt customer service agent specializing in Snow Joe products and warranty resolution. Context: A customer bought a snow blower from Home Depot ten months ago. It won't start after sitting all summer. They've replaced the battery. Ticket is via email, no prior contact on file. Task: Write a first-contact email with three troubleshooting steps to try before we process a warranty claim, plus how to reach us if those steps don't work. Format: Subject line, personalized opening, numbered steps, and a closing with a warranty link placeholder. Tone: Empathetic, confident, solution-focused. That prompt will produce a near-ready response. You might only need to swap in the customer's name and your warranty link.`
+  },
+  {
+    title: "Pro Tips",
+    dur: "~45s",
+    narration: `A few pro tips to lock in. When proofreading, always say "bold all changes you make" — this makes edits instantly visible. When working with large data sets, ask for the summary first, then the full breakdown. If you don't know the right tone, ask for five tone keywords before writing the full prompt. Always name the specific TruVolt brand in your prompt — Snow Joe, Jetson, and Bliss Hammocks each have different voice and policy. And mention the channel — email, phone, and chat require different tones and formats. Finally — save your best prompts. Build a library. Reuse them. The prompt is a template.`
+  },
+  {
+    title: "Summary & Next Steps",
+    dur: "~35s",
+    narration: `That's the full six-part formula. Persona, Context, Task, Format, Examples, Tone. You don't need all six every time — but when the output matters, use all six. The difference is significant. Next time you open Claude or ChatGPT, run through the checklist. And if you build a prompt you're proud of, share it with the team. We're building a prompt library, and the more we share, the faster everyone levels up. Training complete — nice work.`
+  }
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────
+let currentSlide = 0;
+let isPlaying = false;
+let captionsOn = true;
+let speed = 1;
+let utteranceStartMs = 0;
+let elapsedBeforePause = 0;
+let currentText = '';
+let done = new Set();
+
+// ── BUILD SIDEBAR ─────────────────────────────────────────────────────────
+function buildSidebar() {
+  const list = document.getElementById('chapter-list');
+  list.innerHTML = '';
+  chapters.forEach((ch, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'chapter-btn' + (i === 0 ? ' active' : '');
+    btn.id = 'ch-btn-' + i;
+    btn.onclick = () => goToSlide(i);
+    btn.innerHTML = `
+      <div class="ch-num">${i+1}</div>
+      <div class="ch-info">
+        <div class="ch-title">${ch.title}</div>
+        <div class="ch-dur">${ch.dur}</div>
+      </div>
+      <span class="ch-done" id="done-${i}" style="display:none">✓</span>
+    `;
+    list.appendChild(btn);
+  });
+}
+
+// ── SLIDE NAV ─────────────────────────────────────────────────────────────
+function goToSlide(idx) {
+  stopSpeech();
+  document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.chapter-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('slide-' + idx).classList.add('active');
+  document.getElementById('ch-btn-' + idx).classList.add('active');
+  currentSlide = idx;
+  updateProgress();
+  setCaption('');
+  document.getElementById('btn-play').textContent = '▶ Play';
+  isPlaying = false;
+}
+
+function nextSlide() {
+  if (currentSlide < chapters.length - 1) goToSlide(currentSlide + 1);
+}
+function prevSlide() {
+  if (currentSlide > 0) goToSlide(currentSlide - 1);
+}
+
+function updateProgress() {
+  const pct = ((currentSlide + 1) / chapters.length) * 100;
+  document.getElementById('progress-bar-inner').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = (currentSlide+1) + ' / ' + chapters.length;
+}
+
+// ── SPEECH ────────────────────────────────────────────────────────────────
+function stopSpeech() {
+  window.speechSynthesis.cancel();
+  isPlaying = false;
+  elapsedBeforePause = 0;
+}
+
+function speakFrom(text, startMs) {
+  window.speechSynthesis.cancel();
+  let startText = text;
+  if (startMs > 0) {
+    // estimate chars per ms based on speed
+    const avgCharsPerMs = 0.075 * speed;
+    const skipChars = Math.floor(startMs * avgCharsPerMs);
+    const idx = text.indexOf(' ', skipChars);
+    startText = idx > -1 ? text.slice(idx + 1) : text;
+  }
+  const utt = new SpeechSynthesisUtterance(startText);
+  utt.rate = speed;
+  utteranceStartMs = Date.now();
+  currentText = text;
+
+  utt.onboundary = (e) => {
+    if (!captionsOn) return;
+    const words = startText.split(' ');
+    const wi = e.charIndex;
+    const snippet = startText.slice(Math.max(0, wi - 60), wi + 80).trim();
+    setCaption('…' + snippet + '…');
+  };
+  utt.onend = () => {
+    done.add(currentSlide);
+    document.getElementById('done-' + currentSlide).style.display = 'inline';
+    elapsedBeforePause = 0;
+    isPlaying = false;
+    document.getElementById('btn-play').textContent = '▶ Play';
+    setCaption('Chapter complete ✓');
+    if (currentSlide < chapters.length - 1) {
+      setTimeout(() => nextSlide(), 800);
+    }
+  };
+  window.speechSynthesis.speak(utt);
+}
+
+function togglePlay() {
+  if (!isPlaying) {
+    // Start or resume
+    isPlaying = true;
+    document.getElementById('btn-play').textContent = '⏸ Pause';
+    const text = chapters[currentSlide].narration;
+    speakFrom(text, elapsedBeforePause);
+  } else {
+    // Pause
+    const now = Date.now();
+    elapsedBeforePause += (now - utteranceStartMs);
+    window.speechSynthesis.cancel();
+    isPlaying = false;
+    document.getElementById('btn-play').textContent = '▶ Play';
+  }
+}
+
+function changeSpeed(val) {
+  speed = parseFloat(val);
+  if (isPlaying) {
+    const elapsed = elapsedBeforePause + (Date.now() - utteranceStartMs);
+    elapsedBeforePause = elapsed;
+    speakFrom(chapters[currentSlide].narration, elapsedBeforePause);
+  }
+}
+
+function setCaption(text) {
+  const el = document.getElementById('caption-area');
+  el.textContent = text || '';
+}
+
+function toggleCaptions() {
+  captionsOn = !captionsOn;
+  document.getElementById('captions-toggle').textContent = captionsOn ? 'CC On' : 'CC Off';
+  if (!captionsOn) setCaption('');
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+buildSidebar();
+updateProgress();
+</script>
+</body>
+</html>
